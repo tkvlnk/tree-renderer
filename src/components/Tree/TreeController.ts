@@ -11,6 +11,10 @@ export default class TreeController {
   constructor(public data: TreeData) {}
 
   static getChildByPath = (data: TreeData, path: string): TreeData => {
+    if (!path) {
+      return data;
+    }
+
     const pathTail = path.split('.');
 
     pathTail.shift();
@@ -59,6 +63,10 @@ export default class TreeController {
 
   renameChild = (path: string, oldTitle: string, newTitle: string): void => {
     const newData = clone(this.data);
+
+    if (!path && oldTitle === newData.title) {
+      newData.title = newTitle;
+    }
 
     const branch = TreeController.getChildByPath(newData, path);
 

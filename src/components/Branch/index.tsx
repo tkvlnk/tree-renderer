@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useTree } from '../Tree';
 import { TreeData } from '../Tree/TreeController';
+import sm from './styles.module.scss';
 
 export interface TreeBranchProps {
   data: TreeData;
@@ -20,47 +21,59 @@ const TreeBranch: React.FC<TreeBranchProps> = props => {
   const { addChild, renameChild, removeChild } = useTree();
 
   return (
-    <div>
-      <div>
-        <span>{data.title}</span>
+    <ol>
+      <li>
+        <div className={sm.Leaf}>
+          <div>
+            {hasChildren && (
+              <>
+                <button type="button" onClick={toggleChildren}>
+                  {isOpen ? '-' : '+'}
+                </button>
+              </>
+            )}
 
-        <button type="button" onClick={() => renameChild(rootPath, data.title)}>
-          Rename
-        </button>
-        <button type="button" onClick={() => removeChild(rootPath, data.title)}>
-          Remove
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            addChild([rootPath, data.title].filter(Boolean).join('.'))
-          }
-        >
-          Add Child
-        </button>
+            <span>{data.title}</span>
+          </div>
 
-        {hasChildren && (
-          <>
-            <button type="button" onClick={toggleChildren}>
-              {isOpen ? 'hide' : 'show'}
+          <button
+            type="button"
+            onClick={() => renameChild(rootPath, data.title)}
+          >
+            Rename
+          </button>
+          {Boolean(rootPath) && (
+            <button
+              type="button"
+              onClick={() => removeChild(rootPath, data.title)}
+            >
+              Remove
             </button>
-          </>
-        )}
-      </div>
+          )}
+          <button
+            type="button"
+            onClick={() =>
+              addChild([rootPath, data.title].filter(Boolean).join('.'))
+            }
+          >
+            Add Child
+          </button>
+        </div>
 
-      {showChildren && (
-        <ul>
-          {data.children?.map(childData => (
-            <li key={childData.title}>
-              <TreeBranch
-                data={childData}
-                rootPath={[rootPath, data.title].filter(Boolean).join('.')}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+        {showChildren && (
+          <ol>
+            {data.children?.map(childData => (
+              <li key={childData.title}>
+                <TreeBranch
+                  data={childData}
+                  rootPath={[rootPath, data.title].filter(Boolean).join('.')}
+                />
+              </li>
+            ))}
+          </ol>
+        )}
+      </li>
+    </ol>
   );
 };
 
