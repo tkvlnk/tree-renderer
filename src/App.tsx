@@ -1,7 +1,7 @@
 import React from 'react';
-import Tree from './components/Tree';
 
 import data from './data.json';
+import Tree from './components/Tree';
 
 function App() {
   return (

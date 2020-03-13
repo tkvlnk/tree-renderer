@@ -1,46 +1,87 @@
-import React, { useCallback, useState } from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
+import TreeBranch from '../Branch';
+import TreeController, { TreeData } from './TreeController';
 
-interface TreeData {
-  title: string;
-  children?: TreeData[];
+interface TreeContextData {
+  addChild: (path: string) => void;
+  removeChild: (path: string, title: string) => void;
+  renameChild: (path: string, oldTitle: string) => void;
 }
+
+const TreeContext = React.createContext<TreeContextData>({
+  addChild: () => null,
+  removeChild: () => null,
+  renameChild: () => null
+});
 
 export interface TreeProps {
   data: TreeData;
+  onDataChange?: (data: TreeData) => void;
 }
 
+export const useTree = () => useContext(TreeContext);
+
 const Tree: React.FC<TreeProps> = props => {
-  const { data } = props;
+  const { data, onDataChange = () => null } = props;
 
-  const [isOpen, setIsOpen] = useState(true);
+  const ref = useRef(new TreeController(data));
 
-  const hasChildren = Boolean(data.children?.length);
-  const showChildren = hasChildren && isOpen;
+  const [treeData, setTreeData] = useState(ref.current.data);
 
-  const toggleChildren = useCallback(() => setIsOpen(!isOpen), [isOpen]);
+  useEffect(() => {
+    setTreeData(ref.current.data);
+  }, [data]);
+
+  useEffect(() => {
+    onDataChange(treeData);
+  }, [treeData]);
+
+  const handleDataUpdate = useCallback(() => {
+    setTreeData(ref.current.data);
+  }, []);
+
+  const handlers: Omit<TreeContextData, 'data'> = useMemo(
+    () => ({
+      addChild: path => {
+        const newTitle = prompt('Enter child name');
+
+        if (!newTitle) {
+          alert('Title is required');
+        } else {
+          ref.current.addChild(path, newTitle);
+          handleDataUpdate();
+        }
+      },
+      removeChild: (path, title) => {
+        ref.current.removeChild(path, title);
+
+        handleDataUpdate();
+      },
+      renameChild: (path, oldTitle) => {
+        const newTitle = prompt('Enter child name');
+
+        if (!newTitle) {
+          alert('Title is required');
+        } else {
+          ref.current.renameChild(path, oldTitle, newTitle);
+          handleDataUpdate();
+        }
+      }
+    }),
+    []
+  );
 
   return (
-    <div>
-      <div>
-        <span>{data.title}</span>
-
-        {hasChildren && (
-          <button type="button" onClick={toggleChildren}>
-            {isOpen ? 'hide' : 'show'}
-          </button>
-        )}
-      </div>
-
-      {showChildren && (
-        <ul>
-          {data.children?.map(childData => (
-            <li key={childData.title}>
-              <Tree data={childData} />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <TreeContext.Provider value={handlers}>
+      <TreeBranch data={treeData} rootPath="" />
+    </TreeContext.Provider>
   );
 };
 
