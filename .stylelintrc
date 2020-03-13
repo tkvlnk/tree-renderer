@@ -1,0 +1,27 @@
+{
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-recommended-scss",
+    "stylelint-config-rational-order",
+    "stylelint-config-css-modules"
+  ],
+  "plugins": [
+    "stylelint-prettier",
+    "stylelint-order",
+    "stylelint-config-rational-order/plugin",
+    "stylelint-scss"
+  ],
+  "rules": {
+    "prettier/prettier": true,
+    "declaration-empty-line-before": null,
+    "scss/declaration-nested-properties-no-divided-groups": true,
+    "at-rule-no-unknown": null,
+    "block-no-empty": null,
+    "plugin/rational-order": [
+      true,
+      {
+        "empty-line-between-groups": true
+      }
+    ]
+  }
+}
